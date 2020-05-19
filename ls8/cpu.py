@@ -7,7 +7,15 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+        self.pc = 0
+        self.reg = [0] * 8
+
+    def ram_read(self, address):
+        return self.ram[address]
+
+    def ram_write(self, address, value):
+        self.ram[address] = value
 
     def load(self):
         """Load a program into memory."""
@@ -16,14 +24,25 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
+        HALT = 0b00000001
+        PRN = 0b01000111
+        LDI = 0b10000010
+        MUL = 10100010
+
         program = [
             # From print8.ls8
-            0b10000010, # LDI R0,8
+            LDI, # LDI R0,8
             0b00000000,
             0b00001000,
-            0b01000111, # PRN R0
+            LDI, # LDI R1,9
+            0b00000001,
+            0b00001001,
+            MUL, # MUL R0,R1
             0b00000000,
-            0b00000001, # HLT
+            0b00000001,
+            PRN, # PRN R0
+            0b00000000,
+            HALT # HLT
         ]
 
         for instruction in program:
@@ -62,4 +81,36 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        halted = False
+        while not halted:
+            HALT = 0b00000001
+            PRN = 0b01000111
+            LDI = 0b10000010
+            MUL = 10100010
+            instruction = self.ram[self.pc]
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+
+            if instruction == LDI:
+                self.reg[operand_a] = operand_b
+                self.pc += 3
+
+            elif instruction == PRN:
+                print(self.reg[operand_a]) 
+                self.pc += 2
+
+            elif instruction == MUL:
+                print(self.reg[operand_a] * self.reg[operand_b])
+                self.pc += 3
+
+            elif instruction == HALT:
+                halted = True
+
+            else:
+                print(f'unknown instruction {instruction} at address {pc}')
+		    
+
+                
+
+
+    
