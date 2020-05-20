@@ -24,30 +24,41 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
-        HALT = 0b00000001
-        PRN = 0b01000111
-        LDI = 0b10000010
-        MUL = 10100010
 
-        program = [
-            # From print8.ls8
-            LDI, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            LDI, # LDI R1,9
-            0b00000001,
-            0b00001001,
-            MUL, # MUL R0,R1
-            0b00000000,
-            0b00000001,
-            PRN, # PRN R0
-            0b00000000,
-            HALT # HLT
-        ]
+        # HALT = 0b00000001
+        # PRN = 0b01000111
+        # LDI = 0b10000010
+        # MUL = 10100010
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # program = [
+        #     # From print8.ls8
+        #     LDI, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     LDI, # LDI R1,9
+        #     0b00000001,
+        #     0b00001001,
+        #     MUL, # MUL R0,R1
+        #     0b00000000,
+        #     0b00000001,
+        #     PRN, # PRN R0
+        #     0b00000000,
+        #     HALT # HLT
+        # ]
+
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
+
+        with open(sys.argv[1]) as f:
+            for line in f:
+                string_val = line.split("#")[0].strip()
+                if string_val == '':
+                    continue
+                v = int(string_val, 2)
+                #print(v)
+                self.ram[address] = v
+                address += 1
 
 
     def alu(self, op, reg_a, reg_b):
@@ -82,12 +93,12 @@ class CPU:
     def run(self):
         """Run the CPU."""
         halted = False
+        HALT = 0b00000001
+        PRN = 0b01000111
+        LDI = 0b10000010
+        MUL = 0b10100010
         while not halted:
-            HALT = 0b00000001
-            PRN = 0b01000111
-            LDI = 0b10000010
-            MUL = 10100010
-            instruction = self.ram[self.pc]
+            instruction = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
@@ -107,7 +118,9 @@ class CPU:
                 halted = True
 
             else:
-                print(f'unknown instruction {instruction} at address {pc}')
+                print(f'unknown instruction {instruction} at address {self.pc}')
+
+                sys.exit()
 		    
 
                 
