@@ -21,6 +21,8 @@ class CPU:
         """Load a program into memory."""
 
         address = 0
+    
+
 
         # For now, we've just hardcoded a program:
 
@@ -97,6 +99,10 @@ class CPU:
         PRN = 0b01000111
         LDI = 0b10000010
         MUL = 0b10100010
+        PUSH = 0b01000101
+        POP = 0b01000110
+        SP = 7
+
         while not halted:
             instruction = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
@@ -114,6 +120,30 @@ class CPU:
                 print(self.reg[operand_a] * self.reg[operand_b])
                 self.pc += 3
 
+
+            elif instruction == PUSH:
+                # Decrement the SP
+                self.reg[SP] -= 1
+                # Get register number
+                # Get value out of the register
+                val = self.reg[operand_a]         
+                # Store value in memory at SP
+                top_of_stack = self.reg[SP]
+                self.ram[top_of_stack] = val
+                self.pc += 2
+
+            elif instruction == POP:
+                # Get register number
+                # Get value out of the register
+                val = self.ram[self.reg[SP]]    
+                # Store value in memory at SP  
+                self.reg[operand_a] = val
+                # Increment the SP
+                self.reg[SP] += 1
+                self.pc += 2
+
+
+            
             elif instruction == HALT:
                 halted = True
 
