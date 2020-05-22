@@ -10,6 +10,7 @@ class CPU:
         self.ram = [0] * 256
         self.pc = 0
         self.reg = [0] * 8
+        self.SP = 7
 
     def ram_read(self, address):
         return self.ram[address]
@@ -101,7 +102,11 @@ class CPU:
         MUL = 0b10100010
         PUSH = 0b01000101
         POP = 0b01000110
-        SP = 7
+        CALL = 0b01010000
+        RET = 0b00010001
+        ADD = 0b10100000
+
+        # SP = 7
 
         while not halted:
             instruction = self.ram_read(self.pc)
@@ -123,24 +128,47 @@ class CPU:
 
             elif instruction == PUSH:
                 # Decrement the SP
-                self.reg[SP] -= 1
+                self.SP -= 1
                 # Get register number
                 # Get value out of the register
                 val = self.reg[operand_a]         
                 # Store value in memory at SP
-                top_of_stack = self.reg[SP]
-                self.ram[top_of_stack] = val
+                # top_of_stack = self.reg[self.SP]
+                self.ram[self.SP] = val
                 self.pc += 2
 
             elif instruction == POP:
                 # Get register number
                 # Get value out of the register
-                val = self.ram[self.reg[SP]]    
+                val = self.ram[self.SP]    
                 # Store value in memory at SP  
                 self.reg[operand_a] = val
                 # Increment the SP
-                self.reg[SP] += 1
+                self.SP += 1
                 self.pc += 2
+
+            elif instruction == ADD:
+                self.reg[operand_a] += self.reg[operand_b]
+                self.pc += 3
+
+            elif instruction == CALL:
+                return_addr = self.pc + 2
+                # Push it on the stack
+                self.SP -= 1
+                top_of_stack_addr = self.reg[self.SP]
+                self.ram[top_of_stack_addr] = return_addr
+                # Set the PC to the subroutine addr
+                # reg_num = memory[pc + 1]
+                subroutine_addr = self.reg[operand_a]
+                self.pc = subroutine_addr
+
+            elif instruction == RET:
+                # Pop the return addr off stack
+                top_of_stack_addr = self.reg[self.SP]
+                return_addr = self.ram[top_of_stack_addr]
+                self.reg[self.SP] += 1
+                # Store it in the PC
+                self.pc = return_addr
 
 
             
