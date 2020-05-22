@@ -11,6 +11,7 @@ class CPU:
         self.pc = 0
         self.reg = [0] * 8
         self.SP = 7
+        self.FL = [0] * 8
 
     def ram_read(self, address):
         return self.ram[address]
@@ -105,6 +106,11 @@ class CPU:
         CALL = 0b01010000
         RET = 0b00010001
         ADD = 0b10100000
+        CMP = 0b10100111
+        JMP = 0b01010100
+        JEQ = 0b01010101
+        JNE = 0b01010110
+
 
         # SP = 7
 
@@ -170,7 +176,29 @@ class CPU:
                 # Store it in the PC
                 self.pc = return_addr
 
+            elif instruction == CMP:
+                if self.reg[operand_a] == self.reg[operand_b]:
+                    self.FL = 1 
+                else:
+                    self.FL = 0
 
+                self.pc += 3
+
+            elif instruction == JMP:
+                self.pc = self.reg[operand_a]  
+                
+
+            elif instruction == JEQ:
+                if self.FL == 1:
+                    self.pc = self.reg[operand_a] 
+                else:
+                    self.pc += 2
+
+            elif instruction == JNE:
+                if self.FL == 0:
+                    self.pc = self.reg[operand_a] 
+                else:
+                    self.pc += 2
             
             elif instruction == HALT:
                 halted = True
